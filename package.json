@@ -1,5 +1,5 @@
 {
-  "name": "acaopamento",
+  "name": "alert",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
@@ -19,11 +19,14 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo/vector-icons": "^6.1.0",
     "expo": "^21.0.0",
+    "native-base": "^2.3.3",
     "react": "16.0.0-alpha.12",
     "react-native": "^0.48.4",
     "react-native-debugger-open": "^0.3.11",
-    "react-native-router-flux": "^4.0.0-beta.22",
+    "react-native-loading-spinner-overlay": "^0.5.2",
+    "react-navigation": "^1.0.0-beta.15",
     "react-redux": "^5.0.5",
     "redux": "^3.7.2",
     "redux-devtools-extension": "^2.13.2",

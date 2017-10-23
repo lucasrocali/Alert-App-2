@@ -27,8 +27,6 @@ export default class SignupScreen extends Component {
     super(props, context);
     this.state = {
       name: "",
-      birthday: "",
-      address: "",
       email: "",
       password: "",
       password_confirmation: ""
@@ -36,7 +34,7 @@ export default class SignupScreen extends Component {
   }
   handleSignupPress = () => {
     if (this.state.name != "" && this.state.email != "" && this.state.password != "" && this.state.password_confirmation != "") {
-      store.dispatch({type: 'SIGNUP', name: this.state.name, birthday: this.state.birthday, address: this.state.address , email: this.state.email, password: this.state.password, password_confirmation: this.state.password_confirmation});
+      store.dispatch({type: 'SIGNUP', name: this.state.name , email: this.state.email, password: this.state.password, password_confirmation: this.state.password_confirmation});
     }
   };
   handleBackPress = () => {
@@ -67,6 +65,9 @@ export default class SignupScreen extends Component {
             color="white"
           />
         <ScrollView>
+            <View style={styles.markWrap}>
+              <Image style={styles.mark} resizeMode="contain" />
+            </View>
             <View style={styles.wrapper}>
               <View style={styles.inputWrap}>
                 <TextInput 
@@ -74,22 +75,6 @@ export default class SignupScreen extends Component {
                   placeholderTextColor="#333"
                   style={styles.input} 
                   onChangeText={(text) => this.setState({name:text})}
-                />
-              </View>
-              <View style={styles.inputWrap}>
-                <TextInput 
-                  placeholder="Birthday" 
-                  placeholderTextColor="#333"
-                  style={styles.input} 
-                  onChangeText={(text) => this.setState({birthday:text})}
-                />
-              </View>
-              <View style={styles.inputWrap}>
-                <TextInput 
-                  placeholder="Address" 
-                  placeholderTextColor="#333"
-                  style={styles.input} 
-                  onChangeText={(text) => this.setState({address:text})}
                 />
               </View>
               <View style={styles.inputWrap}>
@@ -148,7 +133,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   wrapper: {
-    paddingVertical: 10,
+    paddingVertical: 30,
   },
   inputWrap: {
     flexDirection: "row",
