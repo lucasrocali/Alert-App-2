@@ -1,31 +1,56 @@
-import React, { Component } from 'react';
-import { ScrollView, Text, View, StyleSheet, TextInput, Button, Alert, TouchableOpacity, Dimensions } from 'react-native';
+import React, { Component, PropTypes } from 'react';
 import { Constants, MapView, Location, Permissions } from 'expo';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import StatusBarAlert from 'react-native-statusbar-alert';
+import { saveEvent, getCategories, getTags, getEvents } from '../actions'
+import { Container, Header, Content, Form, Item, Input, Label, Toast, Button, Text, Picker, Left } from 'native-base';
+import Spinner from 'react-native-loading-spinner-overlay';
 
-import store from '../store'
-
-@connect(
-  state => ({
-    loading: state.loading,
-    message: state.message
-  }),
-  dispatch => ({
-    refresh: () => dispatch({type: 'GET_EVENTS'}),
-  }),
-)
-export default class App extends Component {
-  state = {
-    locationResult: null,
-    location: {coords: { latitude: 37.78825, longitude: -122.4324}},
-    inputValue: "Buscar",
-    category: null,
-    tags: [],
-  };
-
+class Event extends Component {
+  constructor(props, context){
+    super(props, context);
+    this.state = {
+      locationResult: null,
+      location: {coords: { latitude: 37.78825, longitude: -122.4324}},
+      seenMessage: false,
+      selected_category_index: undefined,
+      selected_tag_index: undefined
+    };
+  }
+  componentWillMount() {
+    const { categories, getCategories , tags, getTags } = this.props;
+    if (!categories || categories.length == 0) {
+      getCategories()
+    }
+    if (!tags || tags.length == 0) {
+      getTags()
+    }
+  }
+  onCategoryChange(index: string) {
+    console.log('onCategoryChange' + index)
+    this.setState({selected_category_index: index});
+  }
+  onTagChange(index: string) {
+    console.log('onCategoryChange' + index)
+    this.setState({selected_tag_index: index});
+  }
   componentDidMount() {
     this._getLocationAsync();
+  }
+
+  componentDidUpdate() {
+    const { success, message, getEvents } = this.props;
+    if (success) {
+      getEvents();
+      this.props.navigation.navigate('Events');
+    } else if (message && !this.state.seenMessage) {
+      this.setState({seenMessage:true})
+      Toast.show({
+              text: message,
+              position: 'bottom',
+              buttonText: 'Ok'
+            })
+    }
   }
 
   _handleMapRegionChange = mapRegion => {
@@ -55,104 +80,73 @@ export default class App extends Component {
     this.setState({location, region})
   }
 
-  _handleTextChange = inputValue => {
-    this.setState({ inputValue });
-  };
-
-  _handleSearchButtonPress = () => {
-    Alert.alert(
-      'Button Search!',
-      'You did it!',
-    );
-  };
-  
-  _handleCreateBtnPress = () => {
-    console.log("_handleCreateBtnPress");
-    if (this.state.category != null){
-      store.dispatch({type: 'CREATE_EVENT', lat: this.state.location.coords.latitude, lon: this.state.location.coords.longitude, category: this.state.category, tags: this.state.tags });
-    }
-    
-  };
-  _handleUpVoteBtnPress = () => {
-    console.log("_handleStrengthVoteBtnPress");
-    const event = this.props.navigation.state.params;
-    store.dispatch({type: 'SET_STRENGTH', event_id: event.id, up_down: 1 });
-  };
-
-  _handleDownVoteBtnPress = () => {
-    console.log("_handleStrengthVoteBtnPress");
-    const event = this.props.navigation.state.params;
-    store.dispatch({type: 'SET_STRENGTH', event_id: event.id, up_down: 0 });
-  };
-
-  returnCategory(category) {
-    this.setState({ category: category });
-  }
-
-  returnTags(tags) {
-    console.log('returnTags');
-    console.log(tags);
-    this.setState({ tags: tags});
-  }
-
   render() {
-    const { loading, message } = this.props;
-
+    console.log(this.props.navigation.state);
     const event = this.props.navigation.state.params;
-    console.log('render event');
-    console.log(this.props);
-    const create = event ? false : true;
+    console.log(event);
+
+    const { loading, categories, tags, saveEvent } = this.props;
+    
     return (
-      <View style={styles.container}>
-        <StatusBarAlert
-              visible={message != null}
-              message= { message}
-              backgroundColor="#3CC29E"
-              color="white"
-          />
-        <ScrollView>
-          <Text style={styles.title}> Category </Text>
-          <Text 
-            style={styles.input}
-            onPress={() => {
-              if (create) {
-                console.log('On Select Category');
-                console.log(this.props);
-                this.props.navigation.navigate('SelectCategory', {returnCategory: this.returnCategory.bind(this)});
-              }
-            }}> { event ? event.category.name : this.state.category ? this.state.category.name : 'Select Category' } </Text>
+       <Container style= {{ backgroundColor: '#FFF' }}>
+       {event ?
+        <Content padder>
+        <Spinner visible={loading} textStyle={{color: '#FFF'}} />
           
-          <Text style={styles.title}> Location </Text>
-
-          { false ? 
-
-            <View>
-          
-              <TextInput
-                value={this.state.inputValue}
-                onChangeText={this._handleTextChange}
-                style={{ width: 100, height: 44, padding: 8 }}
-              />
-            
-              <TouchableOpacity activeOpacity={.5} onPress={this._handleSearchButtonPress}>
-                <View style={styles.button}>
-                  <Text style={styles.buttonText}>{'Buscar'}</Text>
-                </View>
-              </TouchableOpacity> 
-
-            </View>
-
-            :
-            null
-
-         }
-          
+          <Form>
+            <Item stackedLabel>
+              <Label>Category</Label>
+              <Input disabled
+                value = {event.category.name}
+                onChangeText={(text) => this.setState({email:text})} />
+            </Item>
+            <Item stackedLabel>
+              <Label>User</Label>
+              <Input disabled
+                value = {event.user_name}
+                onChangeText={(text) => this.setState({password:text})} />
+            </Item>
+          </Form>
+          <Button primary block style= {{ margin: 10 }} onPress={()=> {
+                                                          // this.props.navigation.navigate('Main');
+                                                          // this.setState({seenMessage:false})
+                                                          // login(this.state.email, this.state.password);
+                                                        }}>
+            <Text>Edit</Text>
+          </Button>
+        </Content>
+        : 
+        <Content padder>
+          <Item stackedLabel>
+              <Label>Category</Label>
+              <Picker 
+                  mode="dropdown"
+                  placeholder="Select Category"
+                  selectedValue={this.state.selected_category_index}
+                  onValueChange={this.onCategoryChange.bind(this)}>
+                  { categories && categories.map((category, index) => 
+                                <Item key={index} label={category.name} value={index} />
+                  )}
+                  
+              </Picker>
+          </Item>
+          <Item stackedLabel>
+              <Label>Tags</Label>
+              <Picker 
+                  mode="dropdown"
+                  placeholder="Select Category"
+                  selectedValue={this.state.selected_tag_index}
+                  onValueChange={this.onTagChange.bind(this)}>
+                  { tags && tags.map((tag, index) => 
+                                <Item key={index} label={tag.name} value={index} />
+                  )}
+                  
+              </Picker>
+          </Item>
           <MapView
-            style={{ alignSelf: 'stretch', height: 200 }}
+            style={{ alignSelf: 'stretch', height: 200, marginTop: 20 }}
             region={ { latitude: event ? event.location.lat : this.state.location.coords.latitude, longitude: event ? event.location.lon : this.state.location.coords.longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421 } }
-            onRegionChange={this._handleMapRegionChange}
-
-            >
+            onRegionChange={this._handleMapRegionChange}>
           
             <MapView.Marker
               coordinate={ { latitude: event ? event.location.lat : this.state.location.coords.latitude, longitude: event ? event.location.lon : this.state.location.coords.longitude } }
@@ -161,87 +155,46 @@ export default class App extends Component {
             />
        
           </MapView>
-        
-          <Text style={styles.title}> Tags </Text>
-          <Text style={styles.input}
-                onPress={() => {
-                    if (create) {
-                      console.log('On Select Tags');
-                      console.log(this.props);
-                      this.props.navigation.navigate('SelectTags', {returnTags: this.returnTags.bind(this)});
-                    }
-                  }}> { event ? event.event_tags.map(event_tag => event_tag.tag.name).toString() : this.state.tags.length > 0 ? this.state.tags.map(tag => tag.name).toString() : 'Select Tags' } </Text>
-
-           { create ? 
-          
-            <TouchableOpacity activeOpacity={.5} onPress={this._handleCreateBtnPress}>
-              <View style={styles.button}>
-                <Text style={styles.buttonText}>{!loading? 'Create' : 'Loading'}</Text>
-              </View>
-            </TouchableOpacity>
-
-            :
-            <View>
-              <View style={{flexDirection: 'row', flex: 1}}>
-                <Text style={styles.text}> Up { event.up_count }</Text>
-                <Text style={styles.text}> Down { event.down_count }</Text>
-              </View>
-              <View>
-                <TouchableOpacity activeOpacity={.5} onPress={this._handleUpVoteBtnPress}>
-                  <View style={styles.button}>
-                    <Text style={styles.buttonText}>{!loading? 'Reforçar' : 'Loading'}</Text>
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity activeOpacity={.5} onPress={this._handleDownVoteBtnPress}>
-                  <View style={styles.button}>
-                    <Text style={styles.buttonText}>{!loading? 'Denuciar' : 'Loading'}</Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            </View>
-          }
-
-        </ScrollView>
-      </View>
+          <Button primary block style= {{ margin: 10 }} onPress={()=> {
+                                                          console.log('Save');
+                                                          this.setState({seenMessage:false})
+                                                          saveEvent(this.state.location.coords.latitude, this.state.location.coords.longitude, categories[this.state.selected_category_index], tags[this.state.selected_tag_index])
+                                                          // this.props.navigation.navigate('Main');
+                                                          // this.setState({seenMessage:false})
+                                                          // login(this.state.email, this.state.password);
+                                                        }}>
+            <Text>Save</Text>
+          </Button>
+        </Content> 
+        }
+      </Container>
+      
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  title: {
-    padding: 5,
-    fontSize: 18,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    color: '#34495e',
-    backgroundColor: '#ecf0f1',
-  },
-  button: {
-    backgroundColor: "#555555",
-    paddingVertical: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    margin: 10,
-  },
-  buttonText: {
-    color: "#FFF",
-    fontSize: 18,
-  },
-  input: {
-    padding: 5,
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#34495e',
-  },
-  text: {
-    flex:1,
-    justifyContent: 'center',
-    textAlign: 'center',
-    alignItems: 'center',
-  }
-});
+Event.propTypes = {
+  // data
+  message: PropTypes.string,
+  loading: PropTypes.bool,
+  success: PropTypes.bool,
+  categories: PropTypes.array,
+  tags: PropTypes.array,
+
+  // actions
+  saveEvent: PropTypes.func.isRequired,
+  getCategories: PropTypes.func.isRequired,
+  getTags: PropTypes.func.isRequired,
+  getEvents: PropTypes.func.isRequired,
+}
+
+export default connect(
+  state => ({
+    message: state.reducers.new_event.message,
+    loading: state.reducers.new_event.loading,
+    success: state.reducers.new_event.success,
+    categories: state.reducers.categories.categories,
+    tags: state.reducers.tags.tags
+  }),
+  { saveEvent, getCategories, getTags, getEvents }
+)(Event)

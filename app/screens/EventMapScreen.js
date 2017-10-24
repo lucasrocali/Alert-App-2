@@ -1,41 +1,46 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import { Constants, MapView, Location, Permissions } from 'expo';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-
-import store from '../store'
+import { getEvents } from '../actions'
+import { RefreshControl } from 'react-native'
+import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Toast, Button, Icon } from 'native-base';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 };
 
-@connect(
-  state => ({
-    events: state.events,
-    loading: state.loading
-  }),
-  dispatch => ({
-    refresh: () => dispatch({type: 'GET_EVENTS'}),
-  }),
-)
-
-export default class EventMap extends React.Component {
-  showEvent = (event) => {
-    console.log('showEvent');
-    this.props.navigation.navigate('Event', { ...event });
+class EventMap extends Component {
+  constructor(props, context){
+    super(props, context);
+    this.state = {
+      seenMessage: false,
+      locationResult: null,
+      location: {coords: { latitude: 37.78825, longitude: -122.4324}},
+    };
   };
-  state = {
-    locationResult: null,
-    location: {coords: { latitude: 37.78825, longitude: -122.4324}},
-  };
-
-  componentDidMount() {
-    this._getLocationAsync();
-    store.dispatch({type: 'GET_EVENTS'});
+  componentWillMount() {
+    const { events, getEvents } = this.props;
+    if (!events || events.length == 0) {
+      getEvents()
+    }
+    this.getLocationAsync();
   }
-
-  _handleMapRegionChange = mapRegion => {
-    console.log("_handleMapRegionChange ");
+  componentDidUpdate() {
+    const { message } = this.props;
+    if (message && !this.state.seenMessage) {
+      this.setState({seenMessage:true})
+      Toast.show({
+              text: message,
+              position: 'bottom',
+              buttonText: 'Ok'
+            })
+    }
+  }
+  handleMapRegionChange = mapRegion => {
+    console.log("handleMapRegionChange ");
   };
 
-  _getLocationAsync = async () => {
+  getLocationAsync = async () => {
    let { status } = await Permissions.askAsync(Permissions.LOCATION);
    if (status !== 'granted') {
      this.setState({
@@ -58,14 +63,13 @@ export default class EventMap extends React.Component {
     this.setState({location, region})
   }
   render() {
-    console.log('Event Map');
-    console.log(this.props);
-    const { events, loading, refresh } = this.props;
+    const { loading, events } = this.props;
+    
     return (
       <MapView
           style={{ flex: 1 }}
           region={{ latitude: this.state.location.coords.latitude, longitude: this.state.location.coords.longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421 }}
-          onRegionChange={this._handleMapRegionChange}
+          onRegionChange={this.handleMapRegionChange}
         >
          
          {events && events.map((event) => 
@@ -81,4 +85,23 @@ export default class EventMap extends React.Component {
     );
   }
 }
- 
+
+
+EventMap.propTypes = {
+  // data
+  message: PropTypes.string,
+  loading: PropTypes.bool,
+  events: PropTypes.array,
+
+  // actions
+  getEvents: PropTypes.func.isRequired,
+}
+
+export default connect(
+  state => ({
+    message: state.reducers.events.message,
+    loading: state.reducers.events.loading,
+    events: state.reducers.events.events,
+  }),
+  { getEvents }
+)(EventMap)

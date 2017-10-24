@@ -1,73 +1,58 @@
 import reduxTypesCreator from "./ReduxTypesCreator";
-const actionTypes = reduxTypesCreator('LOGIN'); // types
+const actionTypes = reduxTypesCreator('LOGIN','SIGNUP','GET_EVENTS', 'GET_CATEGORIES', 'GET_TAGS', 'CREATE_EVENT' ); // types
 
-export const { LOGIN } = actionTypes;
-
-// export const LOGIN = 'GET_ALL_PRODUCTS'
-// export const LOGIN_SUCCESS = 'RECEIVE_PRODUCTS'
-// export const LOGIN_ERROR = 'GET_ALL_PRODUCTS'
-
-// export const GET_ALL_PRODUCTS = 'GET_ALL_PRODUCTS'
-// export const RECEIVE_PRODUCTS = 'RECEIVE_PRODUCTS'
-
-// export const ADD_TO_CART = 'ADD_TO_CART'
-// export const REMOVE_FROM_CART = 'REMOVE_FROM_CART'
-
-// export const CHECKOUT_REQUEST = 'CHECKOUT_REQUEST'
-// export const CHECKOUT_SUCCESS = 'CHECKOUT_SUCCESS'
-// export const CHECKOUT_FAILURE = 'CHECKOUT_FAILURE'
+export const { LOGIN, SIGNUP, GET_EVENTS, GET_CATEGORIES, GET_TAGS, CREATE_EVENT } = actionTypes;
 
 export function login(email,password) {
 	return {
 	    type: LOGIN.SELF,
-	    email,
-	    password
+	    payload: {
+	    	email: email,
+	    	password: password
+	    }
   }
 }
 
-// export function getAllProducts() {
-//   return {
-//     type: GET_ALL_PRODUCTS
-//   }
-// }
+export function signup(name,email,password,password_confirmation) {
+	console.log('signup');
+	return {
+	    type: SIGNUP.SELF,
+	    payload: {
+	    	name: name,
+		    email: email,
+		    password: password,
+		    password_confirmation: password_confirmation
+	    }
+  }
+}
 
-// export function receiveProducts(products) {
-//   return {
-//     type: RECEIVE_PRODUCTS,
-//     products: products
-//   }
-// }
+export function getEvents() {
+	return {
+	    type: GET_EVENTS.SELF
+  }
+}
 
-// export function addToCart(productId) {
-//   return {
-//     type: ADD_TO_CART,
-//     productId
-//   }
-// }
+export function getCategories() {
+	return {
+	    type: GET_CATEGORIES.SELF
+  }
+}
 
-// export function removeFromCart(productId) {
-//   return {
-//     type: REMOVE_FROM_CART,
-//     productId
-//   }
-// }
+export function getTags() {
+	return {
+	    type: GET_TAGS.SELF
+  }
+}
 
-// export function checkout() {
-//   return {
-//     type: CHECKOUT_REQUEST
-//   }
-// }
-
-// export function checkoutSuccess(cart) {
-//   return {
-//     type: CHECKOUT_SUCCESS,
-//     cart
-//   }
-// }
-
-// export function checkoutFailure(error) {
-//   return {
-//     type: CHECKOUT_FAILURE,
-//     error
-//   }
-// }
+export function saveEvent(lat,lon,category,tag) {
+	console.log('saveEvent'+lat+lon+category+tag)
+	return {
+	    type: CREATE_EVENT.SELF,
+	    payload: {
+	    	lat: lat,
+	    	lon: lon,
+	    	category: category,
+	    	tag: tag
+	    }
+  }
+}

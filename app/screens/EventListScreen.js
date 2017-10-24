@@ -1,90 +1,92 @@
-import React, { Component } from 'react';
-import {
-  Text,
-  View,
-  ScrollView,
-  StyleSheet,
-  Button
-} from 'react-native';
-import { List, ListItem } from 'react-native-elements';
-
+import React, { Component, PropTypes } from 'react';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import {
-  ActivityIndicator,
-  RefreshControl,
-} from 'react-native';
+import { getEvents } from '../actions'
+import { RefreshControl } from 'react-native'
+import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Toast, Button, Icon } from 'native-base';
+import Spinner from 'react-native-loading-spinner-overlay';
 
-import store from '../store'
-
-@connect(
-  state => ({
-    events: state.events,
-    loading: state.loading,
-  }),
-  dispatch => ({
-    refresh: () => dispatch({type: 'GET_EVENTS'}),
-  }),
-)
-
-export default class EventList extends Component {
-  showEvent = (event) => {
-    console.log('showEvent');
-    this.props.navigation.navigate('Event', { ...event });
+class EventList extends Component {
+  constructor(props, context){
+    super(props, context);
+    this.state = {
+      seenMessage: false
+    };
   };
   componentWillMount() {
-    console.log('componentWillMount');
-    store.dispatch({type: 'GET_EVENTS'});
+    const { events, getEvents } = this.props;
+    if (!events || events.length == 0) {
+      getEvents()
+    }
+  }
+  componentDidUpdate() {
+    const { message } = this.props;
+    if (message && !this.state.seenMessage) {
+      this.setState({seenMessage:true})
+      Toast.show({
+              text: message,
+              position: 'bottom',
+              buttonText: 'Ok'
+            })
+    }
   }
   render() {
-    console.log('FOO1');
-    console.log(this.props);
-    const { events, loading, refresh } = this.props;
-    // console.log(events);
-    console.log(loading);
-    console.log(refresh);
-
-    // events ? events.map((event, index) => console.log(event)) : console.log('NO events');
+    const { loading, events, getEvents } = this.props;
+    
     return (
-       <View style={styles.container}>
-        {events
-          ? <ScrollView
-              contentContainerStyle={styles.scrollContent}
-              showsHorizontalScrollIndicator={false}
-              showsVerticalScrollIndicator={false}
-              refreshControl={
+       <Container>
+        <Content refreshControl={
                 <RefreshControl
                   refreshing={loading}
-                  onRefresh={refresh}
+                  onRefresh={() => {
+                    this.setState({seenMessage:false})
+                    getEvents()
+                  }}
                 />
-              }
-            >
-            <List>
-              {events.map((event, index) => <ListItem
+              }>
+          <List>
+            {events && events.map((event, index) => 
+              <ListItem 
                 key={index}
-                title={ event.category.name }
-                subtitle={ event.user_name + ' - ' + event.readable_date}
-                onPress={() => this.showEvent(event)}
-              />)}
-            </List>
-            </ScrollView>
-          :  <ActivityIndicator
-                animating={loading}
-                style={styles.loader}
-                size="large"
-              />
-        }
-      </View>
+                style= {{ marginLeft: 0 }}
+                onPress={() => {
+                                console.log('showevent');
+                                console.log(event);
+                                this.props.navigation.navigate('Event', { ...event } );
+                              }}>
+                <Body>
+                  <Text>{event.category.name}</Text>
+                  <Text note>{event.user_name}</Text>
+
+                </Body>
+                <Right>
+                  <Text note>{event.readable_date}</Text>
+                </Right>
+              </ListItem>
+            )}
+          </List>
+        </Content>
+      </Container>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  loader: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
-});
+
+EventList.propTypes = {
+  // data
+  message: PropTypes.string,
+  loading: PropTypes.bool,
+  events: PropTypes.array,
+
+  // actions
+  getEvents: PropTypes.func.isRequired,
+}
+
+export default connect(
+  state => ({
+    message: state.reducers.events.message,
+    loading: state.reducers.events.loading,
+    events: state.reducers.events.events,
+  }),
+  { getEvents }
+)(EventList)
