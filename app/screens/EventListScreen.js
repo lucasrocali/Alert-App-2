@@ -1,69 +1,49 @@
 import React, { Component, PropTypes } from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { getEvents } from '../actions'
 import { RefreshControl } from 'react-native'
-import { Container, Header, Content, List, ListItem, Left, Body, Right, Thumbnail, Text, Toast, Button, Icon } from 'native-base';
-import Spinner from 'react-native-loading-spinner-overlay';
+import { Container, Content, List, ListItem, Body, Right, Text } from 'native-base';
 
 class EventList extends Component {
-  constructor(props, context){
-    super(props, context);
-    this.state = {
-      seenMessage: false
-    };
-  };
-  componentWillMount() {
-    const { events, getEvents } = this.props;
-    if (!events || events.length == 0) {
-      getEvents()
-    }
+
+  showEventScreen(event) {
+    this.props.navigation.navigate('Event', { ...event } )
   }
-  componentDidUpdate() {
-    const { message } = this.props;
-    if (message && !this.state.seenMessage) {
-      this.setState({seenMessage:true})
-      Toast.show({
-              text: message,
-              position: 'bottom',
-              buttonText: 'Ok'
-            })
-    }
+
+  renderRefreshControl() {
+    const { getEvents } = this.props;
+    return (
+      <RefreshControl
+        refreshing={false}
+        onRefresh={ () => getEvents() }
+      />
+    )
   }
+
+  renderEventItem(event) {
+    return (
+      <ListItem 
+        key={event.id}
+        style= {{ marginLeft: 0 }}
+        onPress={() => this.showEventScreen(event)} >
+        <Body>
+          <Text>{event.category.name}</Text>
+          <Text note>{event.user_name}</Text>
+        </Body>
+        <Right>
+          <Text note>{event.readable_date}</Text>
+        </Right>
+      </ListItem>
+    )
+  }
+  
   render() {
-    const { loading, events, getEvents } = this.props;
-    
+    const { events } = this.props;
     return (
        <Container>
-        <Content refreshControl={
-                <RefreshControl
-                  refreshing={loading}
-                  onRefresh={() => {
-                    this.setState({seenMessage:false})
-                    getEvents()
-                  }}
-                />
-              }>
+        <Content refreshControl={this.renderRefreshControl()}>
           <List>
-            {events && events.map((event, index) => 
-              <ListItem 
-                key={index}
-                style= {{ marginLeft: 0 }}
-                onPress={() => {
-                                console.log('showevent');
-                                console.log(event);
-                                this.props.navigation.navigate('Event', { ...event } );
-                              }}>
-                <Body>
-                  <Text>{event.category.name}</Text>
-                  <Text note>{event.user_name}</Text>
-
-                </Body>
-                <Right>
-                  <Text note>{event.readable_date}</Text>
-                </Right>
-              </ListItem>
-            )}
+            {events && events.map((event) => this.renderEventItem(event)) }
           </List>
         </Content>
       </Container>
@@ -73,20 +53,14 @@ class EventList extends Component {
 
 
 EventList.propTypes = {
-  // data
-  message: PropTypes.string,
-  loading: PropTypes.bool,
   events: PropTypes.array,
 
-  // actions
   getEvents: PropTypes.func.isRequired,
 }
 
 export default connect(
   state => ({
-    message: state.reducers.events.message,
-    loading: state.reducers.events.loading,
-    events: state.reducers.events.events,
+    events: state.reducers.events,
   }),
   { getEvents }
 )(EventList)

@@ -1,4 +1,4 @@
-const production = false;
+const production = true;
 
 var API = 'https://rocali-alert-api.herokuapp.com/';
 var APIToken = "XNZwCzSf5Wxt-caQkxyQ"

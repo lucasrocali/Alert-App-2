@@ -10,21 +10,13 @@ class Login extends Component {
     super(props, context);
     this.state = {
       email: "",
-      password: "",
-      seenMessage: false
+      password: ""
     };
   }
   componentDidUpdate() {
-    const { success, message } = this.props;
+    const { success } = this.props;
     if (success) {
       this.props.navigation.navigate('Main');
-    } else if (message && !this.state.seenMessage) {
-      this.setState({seenMessage:true})
-      Toast.show({
-              text: message,
-              position: 'bottom',
-              buttonText: 'Ok'
-            })
     }
   }
   render() {
@@ -68,8 +60,6 @@ class Login extends Component {
 
 Login.propTypes = {
   // data
-  message: PropTypes.string,
-  loading: PropTypes.bool,
   success: PropTypes.bool,
 
   // actions
@@ -78,9 +68,7 @@ Login.propTypes = {
 
 export default connect(
   state => ({
-    message: state.reducers.login.message,
-    loading: state.reducers.login.loading,
-    success: state.reducers.login.success
+    success: state.reducers.success
   }),
   { login }
 )(Login)

@@ -44,15 +44,10 @@ export function getTags() {
   }
 }
 
-export function saveEvent(lat,lon,category,tag) {
-	console.log('saveEvent'+lat+lon+category+tag)
+export function saveEvent(event) {
+	console.log('saveEvent'+event)
 	return {
 	    type: CREATE_EVENT.SELF,
-	    payload: {
-	    	lat: lat,
-	    	lon: lon,
-	    	category: category,
-	    	tag: tag
-	    }
+	    payload: event
   }
 }

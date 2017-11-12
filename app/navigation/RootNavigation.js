@@ -1,5 +1,8 @@
 import { Notifications } from 'expo';
-import React from 'react';
+import React, { PropTypes } from 'react';
+import { connect } from 'react-redux';
+import { Toast } from 'native-base'; 
+import Spinner from 'react-native-loading-spinner-overlay';
 
 // import registerForPushNotificationsAsync from '../api/registerForPushNotificationsAsync';
 
@@ -12,9 +15,10 @@ import React from 'react';
 //   },
 // });
 
-import { Root } from './Routers';
+import { Root } from "native-base";
+import { RootStack } from './Routers';
 
-export default class RootNavigator extends React.Component {
+class RootNavigator extends React.Component {
   // componentDidMount() {
   //   this._notificationSubscription = this._registerForPushNotifications();
   // }
@@ -23,8 +27,25 @@ export default class RootNavigator extends React.Component {
   //   this._notificationSubscription && this._notificationSubscription.remove();
   // }
 
+  componentDidUpdate() {
+    const { message } = this.props;
+    if (message) {
+      Toast.show({
+              text: message,
+              position: 'bottom',
+              buttonText: 'Ok'
+            })
+    }
+  }
+
   render() {
-    return <Root />;
+     const { loading } = this.props;
+    return (
+      <Root>
+        <Spinner visible={loading} textStyle={{color: '#FFF'}} />
+        <RootStack />
+      </Root>
+    );
   }
   //
   // _registerForPushNotifications() {
@@ -46,3 +67,15 @@ export default class RootNavigator extends React.Component {
   //   );
   // };
 }
+
+RootNavigator.propTypes = {
+  message: PropTypes.string,
+  loading: PropTypes.bool,
+}
+
+export default connect(
+  state => ({
+    message: state.reducers.message,
+    loading: state.reducers.loading,
+  })
+)(RootNavigator)

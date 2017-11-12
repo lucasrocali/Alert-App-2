@@ -186,7 +186,7 @@ export const MainScreenStack = TabNavigator(
 );
 
 
-export const Root = StackNavigator({
+export const RootStack = StackNavigator({
   Login: {
     screen: LoginStack,
   },
