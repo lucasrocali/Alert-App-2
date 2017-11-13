@@ -5,6 +5,7 @@ import { Container, Header, Content, Form, Item, Input, Label, Toast, Button, Te
 import * as selectors from '../reducers/reducers';
 
 class Signup extends Component {
+
   constructor(props, context){
     super(props, context);
     this.state = {
@@ -14,12 +15,14 @@ class Signup extends Component {
       password_confirmation: ""
     };
   }
+
   componentDidUpdate() {
     const { success, message } = this.props;
     if (success) {
       this.props.navigation.navigate('Main');
     }
   }
+  
   handleSignupPress() {
     const { signup } = this.props;
     const { name, email, password, password_confirmation } = this.state
@@ -29,6 +32,7 @@ class Signup extends Component {
   handleBackPress() {
     this.props.navigation.goBack(null); 
   }
+
   render() {
     return (
        <Container>

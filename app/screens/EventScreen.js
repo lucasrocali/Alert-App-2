@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { MapView, Location, Permissions } from 'expo';
 import { connect } from 'react-redux';
-import { saveEvent, loadCategories, loadTags, loadEvents } from '../actions'
+import { saveEvent, loadCategories, loadTags, loadEvents, setStrenght } from '../actions'
 import { Container, Content, Item, Input, Label, Toast, Button, Text, Picker, Left } from 'native-base';
 import * as selectors from '../reducers/reducers';
 
@@ -125,6 +125,18 @@ class Event extends Component {
     }
   }
 
+  handleReinforceEventBtn() {
+    const event = this.props.navigation.state.params;
+    const { setStrenght } = this.props
+    setStrenght(event.id,1)
+  }
+
+  handleReportEventBtn() {
+    const event = this.props.navigation.state.params;
+    const { setStrenght } = this.props
+    setStrenght(event.id,0)
+  }
+
   renderViewEvent(event) {
     return (
       <Content padder>
@@ -138,6 +150,7 @@ class Event extends Component {
           <Input disabled
             value = {event.category.name} />
         </Item>
+        <Text note>{`${event.up_count} ups and ${event.down_count} downs`}</Text>
         <MapView
           style={ { alignSelf: 'stretch', height: 200, marginTop: 20 } }
           region={ this.getRegion(event) } >
@@ -147,6 +160,12 @@ class Event extends Component {
             title= { event.category.name }
             description = { event.user_name } />
         </MapView>
+        <Button primary block style= {{ margin: 10 }} onPress={this.handleReinforceEventBtn.bind(this)}>
+          <Text>Reforçar</Text>
+        </Button>
+        <Button light block style= {{ margin: 10 }} onPress={this.handleReportEventBtn.bind(this)}>
+          <Text>Denunciar</Text>
+        </Button>
       </Content>
     )
   }
@@ -218,23 +237,22 @@ class Event extends Component {
 }
 
 Event.propTypes = {
-  // data
   success: PropTypes.bool,
   categories: PropTypes.array,
   tags: PropTypes.array,
 
-  // actions
   saveEvent: PropTypes.func.isRequired,
   loadCategories: PropTypes.func.isRequired,
   loadTags: PropTypes.func.isRequired,
   loadEvents: PropTypes.func.isRequired,
+  setStrenght: PropTypes.func.isRequired
 }
 
 export default connect(
   state => ({
-    success: selectors.isEventCreated(state),
+    success: selectors.isEventSuccess(state),
     categories:selectors.getCategories(state),
     tags: selectors.getTags(state)
   }),
-  { saveEvent, loadCategories, loadTags, loadEvents }
+  { saveEvent, loadCategories, loadTags, loadEvents, setStrenght }
 )(Event)

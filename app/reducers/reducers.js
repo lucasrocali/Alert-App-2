@@ -1,4 +1,4 @@
-import { AUTHENTIFICATION, GET_EVENTS, GET_CATEGORIES, GET_TAGS, CREATE_EVENT  } from '../actions';
+import { AUTHENTIFICATION, GET_EVENTS, GET_CATEGORIES, GET_TAGS, CREATE_EVENT, SET_STRENGTH, LOGOUT } from '../actions';
 
 const initialState = {
   authentication: {
@@ -12,7 +12,7 @@ const initialState = {
     message: "",
     events: [],
   },
-  new_event: {
+  event: {
     loading: false,
     message: "",
     success: false,
@@ -22,10 +22,6 @@ const initialState = {
 }
 
 export default function reducers(state = initialState, action) {
-  console.log("reducers");
-  console.log(state);
-  console.log(action);
-  console.log("REDUCER_TYPE")
   switch (action.type) {
     case AUTHENTIFICATION.LOADING:
       return { ...state,
@@ -78,15 +74,15 @@ export default function reducers(state = initialState, action) {
       };
     case GET_CATEGORIES.LOADING:
       return { ...state,
-                  new_event: {
-                    ...state.new_event,
+                  event: {
+                    ...state.event,
                     loading: true,
                   },
               };
     case GET_CATEGORIES.ERROR:
       return { ...state,
-                  new_event: {
-                    ...state.new_event,
+                  event: {
+                    ...state.event,
                     loading: false,
                   },
               };
@@ -94,8 +90,8 @@ export default function reducers(state = initialState, action) {
       var message = action.response.message != null ? action.response.message : null
       var categories = message == null && action.response ? action.response : null
       return { ...state,
-                new_event: {
-                  ...state.new_event,
+                event: {
+                  ...state.event,
                   loading: false,
                   message:  action.response.message,
                   categories: categories
@@ -103,15 +99,15 @@ export default function reducers(state = initialState, action) {
       };
       case GET_TAGS.LOADING:
       return { ...state,
-                  new_event: {
-                    ...state.new_event,
+                  event: {
+                    ...state.event,
                     loading: true,
                   },
               };
     case GET_TAGS.ERROR:
       return { ...state,
-                  new_event: {
-                    ...state.new_event,
+                  event: {
+                    ...state.event,
                     loading: false,
                   },
               };
@@ -119,8 +115,8 @@ export default function reducers(state = initialState, action) {
       var message = action.response.message != null ? action.response.message : null
       var tags = message == null && action.response ? action.response : null
       return { ...state,
-                new_event: {
-                   ...state.new_event,
+                event: {
+                   ...state.event,
                   loading: false,
                   message:  action.response.message,
                   tags: tags
@@ -128,15 +124,15 @@ export default function reducers(state = initialState, action) {
       };
       case CREATE_EVENT.LOADING:
       return { ...state,
-                  new_event: {
-                    ...state.new_event,
+                  event: {
+                    ...state.event,
                     loading: true,
                   },
               };
     case CREATE_EVENT.ERROR:
       return { ...state,
-                  new_event: {
-                    ...state.new_event,
+                  event: {
+                    ...state.event,
                     loading: false,
                   },
               };
@@ -144,22 +140,55 @@ export default function reducers(state = initialState, action) {
       var message = action.response.message != null ? action.response.message : null
       var success = message == null ? true : false;
       return { ...state,
-                new_event: {
-                   ...state.new_event,
+                event: {
+                   ...state.event,
                   loading: false,
                   message:  action.response.message,
                   success: success
                 },
       };
+    case SET_STRENGTH.LOADING:
+      return { ...state,
+                  event: {
+                    ...state.event,
+                    loading: true,
+                  },
+              };
+    case SET_STRENGTH.ERROR:
+      return { ...state,
+                  event: {
+                    ...state.event,
+                    loading: false,
+                  },
+              };
+     case SET_STRENGTH.SUCCESS:
+      var message = action.response.message != null ? action.response.message : null
+      var success = message == null ? true : false;
+      return { ...state,
+                event: {
+                   ...state.event,
+                  loading: false,
+                  message:  action.response.message,
+                  success: success
+                },
+      };
+    case LOGOUT.SELF:
+      return initialState;
     default:
     return { ...state,
                   authentication: {
                     ...state.authentication,
                     success: false,
+                    message: "",
                   },
-                  new_event: {
-                    ...state.new_event,
+                  events: {
+                    ...state.events,
+                    message: "",
+                  },
+                  event: {
+                    ...state.event,
                     success: false,
+                    message: "",
                   }
               };;
   }
@@ -173,7 +202,7 @@ export function getMessage(state) {
 
     return state.reducers.events.message
 
-  } else if (state.reducers.new_event.message != "") {
+  } else if (state.reducers.event.message != "") {
 
     return state.reducers.authentication.message
 
@@ -182,7 +211,7 @@ export function getMessage(state) {
 }
 
 export function isLoading(state) {
-  return state.reducers.authentication.loading || state.reducers.events.loading || state.reducers.new_event.loading;
+  return state.reducers.authentication.loading || state.reducers.events.loading || state.reducers.event.loading;
 }
 
 export function isAuthenticated(state) {
@@ -194,13 +223,13 @@ export function getEvents(state) {
 }
 
 export function getCategories(state) {
-  return state.reducers.new_event.categories
+  return state.reducers.event.categories
 }
 
 export function getTags(state) {
-  return state.reducers.new_event.tags
+  return state.reducers.event.tags
 }
 
-export function isEventCreated(state) {
-  return state.reducers.new_event.success
+export function isEventSuccess(state) {
+  return state.reducers.event.success
 }

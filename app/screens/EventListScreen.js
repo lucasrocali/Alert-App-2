@@ -30,6 +30,7 @@ class EventList extends Component {
         <Body>
           <Text>{event.category.name}</Text>
           <Text note>{event.user_name}</Text>
+          <Text note>{`${event.up_count} ups and ${event.down_count} downs`}</Text>
         </Body>
         <Right>
           <Text note>{event.readable_date}</Text>

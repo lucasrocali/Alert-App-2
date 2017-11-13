@@ -1,65 +1,48 @@
-import React, { Component } from 'react';
-import {
-  View,
-  ScrollView,
-  StyleSheet
-} from 'react-native';
-import { List, ListItem } from 'react-native-elements';
-import { NavigationActions } from 'react-navigation';
+import React, { Component, PropTypes } from 'react';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import { logout } from '../actions'
+import { Container, Content, List, ListItem, Body, Text } from 'native-base';
+import { NavigationActions } from 'react-navigation';
 
-import store from '../store'
+class Perfil extends Component {
 
-@connect(
-  state => ({
-    elements: state.elements,
-    loading: state.loading,
-  })
-)
-
-export default class PerfilScreen extends Component {
-  logout = () => {
+  handleLogoutPress() {
+    const { logout } = this.props;
     const resetAction = NavigationActions.reset({
-            index: 0,
-            actions: [
-                NavigationActions.navigate({ routeName: 'Login' }),
-            ],
-            key: null
-        });
-    console.log('logout');
+                         index: 0,
+                         key: null,
+                         actions: [
+                           NavigationActions.navigate({ routeName: 'Login' })
+                         ]
+                      });
     this.props.navigation.dispatch(resetAction);
-
-    // this.props.navigation.navigate('Element', { ...element });
-  };
+    logout();
+  }
+  
   render() {
-
     return (
-       <View style={styles.container}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          // Hide all scroll indicators
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-        >
-        <List>
-          <ListItem
-            title={'Logout'}
-            onPress={() => this.logout()}
-          />
-            </List>
-        </ScrollView>
-      </View>
+       <Container>
+        <Content style= {{ paddingTop: 20 }}>
+          <List>
+            <ListItem style= {{ marginLeft: 0 }} onPress={this.handleLogoutPress.bind(this)}>
+              <Body>
+                <Text>Logout</Text>
+              </Body>
+            </ListItem>
+          </List>
+        </Content>
+      </Container>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1
-  },
-  loader: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
-});
+
+Perfil.propTypes = {
+  logout: PropTypes.func.isRequired,
+}
+
+export default connect(
+  state => ({}),
+  { logout }
+)(Perfil)

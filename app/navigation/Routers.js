@@ -10,33 +10,14 @@ import SignupScreen from '../screens/SignupScreen';
 import EventListScreen from  '../screens/EventListScreen';
 import EventMapScreen from  '../screens/EventMapScreen';
 import EventScreen from  '../screens/EventScreen';
-// import SelectCategoryScreen from  '../screens/SelectCategoryScreen';
-// import SelectTagsScreen from  '../screens/SelectTagsScreen';
-// import PerfilScreen from '../screens/PerfilScreen';
+import PerfilScreen from  '../screens/PerfilScreen';
 
-// const RootStackNavigator = StackNavigator(
-//   {
-//     Main: {
-//       screen: MainScreenStack,
-//       navigationOptions: {
-//         title: 'Main',
-//       },
-//     },
-//   },
-//   {
-//     navigationOptions: () => ({
-//       headerTitleStyle: {
-//         fontWeight: 'normal',
-//       },
-//     }),
-//   }
-// );
 export const SignupStack = StackNavigator({
   Signup: {
     screen: SignupScreen,
     navigationOptions: ({ navigation }) => ({
       title: 'Signup',
-      //gesturesEnabled: false,
+      gesturesEnabled: false,
     }),
   },
 });
@@ -46,20 +27,20 @@ export const LoginStack = StackNavigator({
     screen: LoginScreen,
     navigationOptions: ({ navigation }) => ({
       title: 'Login',
-      //gesturesEnabled: false,
+      gesturesEnabled: false,
     }),
   },
 });
 
-// export const PerfilStack = StackNavigator({
-//   Perfil: {
-//     screen: PerfilScreen,
-//     navigationOptions: ({ navigation }) => ({
-//       title: 'Perfil',
-//       //gesturesEnabled: false,
-//     }),
-//   },
-// });
+export const PerfilStack = StackNavigator({
+  Perfil: {
+    screen: PerfilScreen,
+    navigationOptions: ({ navigation }) => ({
+      title: 'Perfil',
+      gesturesEnabled: false,
+    }),
+  },
+});
 
 
 export const AddEventStack = StackNavigator({
@@ -67,44 +48,25 @@ export const AddEventStack = StackNavigator({
     screen: EventScreen,
     navigationOptions: ({ navigation }) => ({
       title: 'AddEvent',
-      //gesturesEnabled: false,
+      gesturesEnabled: false,
     }),
   },
 });
 
-// export const SelectCategoryStack = StackNavigator({
-//   SelectCategory: {
-//     screen: SelectCategoryScreen,
-//     navigationOptions: ({ navigation }) => ({
-//       title: 'Select Category',
-//       //gesturesEnabled: false,
-//     }),
-//   },
-// });
-
-// export const SelectTagsStack = StackNavigator({
-//   SelectTags: {
-//     screen: SelectTagsScreen,
-//     navigationOptions: ({ navigation }) => ({
-//       title: 'Select Tags',
-//       //gesturesEnabled: false,
-//     }),
-//   },
-// });
 
 export const EventMapStack = StackNavigator({
   EventList: {
     screen: EventMapScreen,
     navigationOptions: {
       title: 'Event Map',
-      //gesturesEnabled: false,
+      gesturesEnabled: false,
     },
   },
   Event: {
     screen: EventScreen,
     navigationOptions: ({ navigation }) => ({
       title: 'Event',
-      //gesturesEnabled: false,
+      gesturesEnabled: false,
     }),
   },
 });
@@ -114,14 +76,14 @@ export const EventListStack = StackNavigator({
     screen: EventListScreen,
     navigationOptions: {
       title: 'Event List',
-      //gesturesEnabled: false,
+      gesturesEnabled: false,
     },
   },
   Event: {
     screen: EventScreen,
     navigationOptions: ({ navigation }) => ({
       title: 'Event',
-      //gesturesEnabled: false,
+      gesturesEnabled: false,
     }),
   },
 });
@@ -138,9 +100,9 @@ export const MainScreenStack = TabNavigator(
     AddEvent: {
       screen: AddEventStack
     },
-    // Perfil: {
-    //   screen: PerfilStack
-    // }
+    Perfil: {
+      screen: PerfilStack
+    }
   },
   {
     navigationOptions: ({ navigation }) => ({
@@ -181,7 +143,7 @@ export const MainScreenStack = TabNavigator(
     tabBarPosition: 'bottom',
     animationEnabled: false,
     swipeEnabled: false,
-    //gesturesEnabled: false,
+    gesturesEnabled: false,
   }
 );
 
@@ -196,12 +158,6 @@ export const RootStack = StackNavigator({
   Main: {
     screen: MainScreenStack,
   },
-  // SelectCategory: {
-  //   screen: SelectCategoryStack,
-  // },
-  // SelectTags: {
-  //   screen: SelectTagsStack,
-  // },
 }, {
   mode: 'modal',
   headerMode: 'none',
