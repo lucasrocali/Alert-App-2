@@ -1,9 +1,8 @@
 import React, { Component, PropTypes } from 'react';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { login } from '../actions'
-import { Container, Header, Content, Form, Item, Input, Label, Toast, Button, Text } from 'native-base';
-import Spinner from 'react-native-loading-spinner-overlay';
+import { Container, Content, Form, Item, Input, Label, Button, Text } from 'native-base';
+import * as selectors from '../reducers/reducers';
 
 class Login extends Component {
   constructor(props, context){
@@ -19,13 +18,18 @@ class Login extends Component {
       this.props.navigation.navigate('Main');
     }
   }
+  handleLoginPress() {
+    const { login } = this.props;
+    const { email, password } = this.state
+    login( email, password )
+  }
+  handleSignupPress() {
+    this.props.navigation.navigate('Signup');
+  }
   render() {
-    const { loading, login } = this.props;
-    
     return (
        <Container>
         <Content padder>
-          <Spinner visible={loading} textStyle={{color: '#FFF'}} />
           <Form>
             <Item stackedLabel>
               <Label>Email</Label>
@@ -36,19 +40,10 @@ class Login extends Component {
               <Input secureTextEntry onChangeText={(text) => this.setState({password:text})} />
             </Item>
           </Form>
-          <Button primary block style= {{ margin: 10 }} onPress={()=> {
-                                                          // this.props.navigation.navigate('Main');
-                                                          this.setState({seenMessage:false})
-                                                          // login('rocali@outlook.com', 'password')
-                                                          login(this.state.email, this.state.password);
-                                                        }}>
+          <Button primary block style= {{ margin: 10 }} onPress={this.handleLoginPress.bind(this)}>
             <Text>Login</Text>
           </Button>
-          <Button info block style= {{ margin: 10 }} onPress={()=> {
-                                                          this.props.navigation.navigate('Signup');
-                                                          // this.setState({seenMessage:false})
-                                                          // login(this.state.email, this.state.password);
-                                                        }}>
+          <Button info block style= {{ margin: 10 }} onPress={this.handleSignupPress.bind(this)}>
             <Text>Signup</Text>
           </Button>
         </Content>
@@ -59,16 +54,14 @@ class Login extends Component {
 }
 
 Login.propTypes = {
-  // data
   success: PropTypes.bool,
 
-  // actions
   login: PropTypes.func.isRequired,
 }
 
 export default connect(
   state => ({
-    success: state.reducers.success
+    success: selectors.isAuthenticated(state)
   }),
   { login }
 )(Login)

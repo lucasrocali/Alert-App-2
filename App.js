@@ -18,6 +18,7 @@ import { root } from './app/sagas/sagas';
 - Detox
 - Logout
 - Unmess stack views 
+- logout api
 */
 
 const sagaMiddleware = createSagaMiddleware();

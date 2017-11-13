@@ -1,12 +1,13 @@
 import reduxTypesCreator from "./ReduxTypesCreator";
-const actionTypes = reduxTypesCreator('LOGIN','SIGNUP','GET_EVENTS', 'GET_CATEGORIES', 'GET_TAGS', 'CREATE_EVENT' ); // types
+const actionTypes = reduxTypesCreator('AUTHENTIFICATION','GET_EVENTS', 'GET_CATEGORIES', 'GET_TAGS', 'CREATE_EVENT' ); // types
 
-export const { LOGIN, SIGNUP, GET_EVENTS, GET_CATEGORIES, GET_TAGS, CREATE_EVENT } = actionTypes;
+export const { AUTHENTIFICATION, GET_EVENTS, GET_CATEGORIES, GET_TAGS, CREATE_EVENT } = actionTypes;
 
 export function login(email,password) {
 	return {
-	    type: LOGIN.SELF,
+	    type: AUTHENTIFICATION.SELF,
 	    payload: {
+	    	login: true,
 	    	email: email,
 	    	password: password
 	    }
@@ -14,10 +15,10 @@ export function login(email,password) {
 }
 
 export function signup(name,email,password,password_confirmation) {
-	console.log('signup');
 	return {
-	    type: SIGNUP.SELF,
+	    type: AUTHENTIFICATION.SELF,
 	    payload: {
+	    	login: false,
 	    	name: name,
 		    email: email,
 		    password: password,

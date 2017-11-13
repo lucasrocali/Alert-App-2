@@ -1,40 +1,17 @@
-import { Notifications } from 'expo';
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { Toast } from 'native-base'; 
 import Spinner from 'react-native-loading-spinner-overlay';
-
-// import registerForPushNotificationsAsync from '../api/registerForPushNotificationsAsync';
-
-// export const LoginStack = StackNavigator({
-//   Login: {
-//     screen: LoginScreen,
-//     navigationOptions: {
-//       title: 'LoginScreen',
-//     },
-//   },
-// });
-
 import { Root } from "native-base";
 import { RootStack } from './Routers';
+import * as selectors from '../reducers/reducers';
 
 class RootNavigator extends React.Component {
-  // componentDidMount() {
-  //   this._notificationSubscription = this._registerForPushNotifications();
-  // }
-  //
-  // componentWillUnmount() {
-  //   this._notificationSubscription && this._notificationSubscription.remove();
-  // }
 
   componentDidUpdate() {
     const { message } = this.props;
     if (message) {
-      Toast.show({
-              text: message,
-              position: 'bottom',
-              buttonText: 'Ok'
-            })
+      Toast.show({text: message,position: 'bottom',buttonText: 'Ok'})
     }
   }
 
@@ -47,25 +24,6 @@ class RootNavigator extends React.Component {
       </Root>
     );
   }
-  //
-  // _registerForPushNotifications() {
-  //   // Send our push token over to our backend so we can receive notifications
-  //   // You can comment the following line out if you want to stop receiving
-  //   // a notification every time you open the app. Check out the source
-  //   // for this function in api/registerForPushNotificationsAsync.js
-  //   registerForPushNotificationsAsync();
-  //
-  //   // Watch for incoming notifications
-  //   this._notificationSubscription = Notifications.addListener(
-  //     this._handleNotification
-  //   );
-  // }
-  //
-  // _handleNotification = ({ origin, data }) => {
-  //   console.log(
-  //     `Push notification ${origin} with data: ${JSON.stringify(data)}`
-  //   );
-  // };
 }
 
 RootNavigator.propTypes = {
@@ -75,7 +33,7 @@ RootNavigator.propTypes = {
 
 export default connect(
   state => ({
-    message: state.reducers.message,
-    loading: state.reducers.loading,
+    message: selectors.getMessage(state),
+    loading: selectors.isLoading(state)
   })
 )(RootNavigator)

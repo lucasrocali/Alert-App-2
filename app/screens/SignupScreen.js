@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { signup } from '../actions'
 import { Container, Header, Content, Form, Item, Input, Label, Toast, Button, Text } from 'native-base';
+import * as selectors from '../reducers/reducers';
 
 class Signup extends Component {
   constructor(props, context){
@@ -19,18 +20,16 @@ class Signup extends Component {
       this.props.navigation.navigate('Main');
     }
   }
-  handleSignupBtn() {
+  handleSignupPress() {
     const { signup } = this.props;
-
-    signup(this.state.name,this.state.email, this.state.password,this.state.password_confirmation);
+    const { name, email, password, password_confirmation } = this.state
+    signup( name, email, password, password_confirmation );
   }
 
-  handleBackBtn() {
+  handleBackPress() {
     this.props.navigation.goBack(null); 
   }
   render() {
-    const { signup } = this.props;
-    
     return (
        <Container>
         <Content padder>
@@ -52,10 +51,10 @@ class Signup extends Component {
               <Input secureTextEntry onChangeText={(text) => this.setState({password_confirmation:text})} />
             </Item>
           </Form>
-          <Button primary style= {{ margin: 10 }} block onPress={ this.handleSignupBtn.bind(this)}>
+          <Button primary style= {{ margin: 10 }} block onPress={ this.handleSignupPress.bind(this)}>
             <Text>Signup</Text>
           </Button>
-          <Button light style= {{ margin: 10 }} block onPress={ this.handleBackBtn.bind(this)}>
+          <Button light style= {{ margin: 10 }} block onPress={ this.handleBackPress.bind(this)}>
             <Text>Back</Text>
           </Button>
         </Content>
@@ -74,7 +73,7 @@ Signup.propTypes = {
 
 export default connect(
   state => ({
-    success: state.reducers.success
+    success: selectors.isAuthenticated(state)
   }),
   { signup }
 )(Signup)

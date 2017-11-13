@@ -1,40 +1,50 @@
 
 import { call, takeEvery, takeLatest, put, select } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
-import { LOGIN, SIGNUP, GET_EVENTS, GET_CATEGORIES, GET_TAGS, CREATE_EVENT } from "../actions/";
+import { AUTHENTIFICATION, GET_EVENTS, GET_CATEGORIES, GET_TAGS, CREATE_EVENT } from "../actions/";
 import { loginRequest, signupRequest, getEventsRequest, getCategoriesRequest, getTagsRequest, saveEventRequest } from "../api/"
 
 const getToken = state => state.reducers.user.auth_token;
 
-const login = function* (action){
+const authenticate = function* (action){
   try {
-    yield put({ type: LOGIN.LOADING })
+    yield put({ type: AUTHENTIFICATION.LOADING })
 
-    const user_login = action.payload
+    const user_credentials = action.payload
 
-    const response = yield call(loginRequest, user_login)
+    if (user_credentials.login) {
+      
+      const response = yield call(loginRequest, user_credentials)
 
-    yield put({ type: LOGIN.SUCCESS, response })
+      yield put({ type: AUTHENTIFICATION.SUCCESS, response })
+    } else {
+
+      const response = yield call(signupRequest, user_credentials)
+
+      yield put({ type: AUTHENTIFICATION.SUCCESS, response })
+    }
+
+    
   } catch (error) {
     console.log(error);
-    yield put({ type: LOGIN.ERROR, error })
+    yield put({ type: AUTHENTIFICATION.ERROR, error })
   }
 };
 
-const signup = function* (action){
-  try {
-    yield put({ type: SIGNUP.LOADING })
+// const signup = function* (action){
+//   try {
+//     yield put({ type: SIGNUP.LOADING })
 
-    const user_signup = action.payload;
+//     const user_signup = action.payload;
 
-    const response = yield call(signupRequest, user_signup)
+   
 
-    yield put({ type: SIGNUP.SUCCESS, response })
-  } catch (error) {
-    console.log(error);
-    yield put({ type: SIGNUP.ERROR, error })
-  }
-};
+//     yield put({ type: SIGNUP.SUCCESS, response })
+//   } catch (error) {
+//     console.log(error);
+//     yield put({ type: SIGNUP.ERROR, error })
+//   }
+// };
 
 const getEvents = function* (action){
   try {
@@ -98,8 +108,7 @@ const saveEvent = function* (action){
   }
 };
 export const root = function* () {
-  yield takeLatest(LOGIN.SELF, login)
-  yield takeLatest(SIGNUP.SELF, signup)
+  yield takeLatest(AUTHENTIFICATION.SELF, authenticate)
   yield takeLatest(GET_EVENTS.SELF, getEvents)
   yield takeLatest(GET_CATEGORIES.SELF, getCategories)
   yield takeLatest(GET_TAGS.SELF, getTags)
