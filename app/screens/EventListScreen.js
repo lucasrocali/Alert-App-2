@@ -1,8 +1,9 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { getEvents } from '../actions'
+import { loadEvents } from '../actions'
 import { RefreshControl } from 'react-native'
 import { Container, Content, List, ListItem, Body, Right, Text } from 'native-base';
+import * as selectors from '../reducers/reducers';
 
 class EventList extends Component {
 
@@ -11,11 +12,11 @@ class EventList extends Component {
   }
 
   renderRefreshControl() {
-    const { getEvents } = this.props;
+    const { loadEvents } = this.props;
     return (
       <RefreshControl
         refreshing={false}
-        onRefresh={ () => getEvents() }
+        onRefresh={ () => loadEvents() }
       />
     )
   }
@@ -55,12 +56,12 @@ class EventList extends Component {
 EventList.propTypes = {
   events: PropTypes.array,
 
-  getEvents: PropTypes.func.isRequired,
+  loadEvents: PropTypes.func.isRequired,
 }
 
 export default connect(
   state => ({
-    events: state.reducers.events,
+    events: selectors.getEvents(state)
   }),
-  { getEvents }
+  { loadEvents }
 )(EventList)

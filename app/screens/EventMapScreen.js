@@ -1,11 +1,13 @@
 import React, { Component, PropTypes } from 'react';
 import { MapView, Location, Permissions } from 'expo';
 import { connect } from 'react-redux';
-import { getEvents } from '../actions'
+import { loadEvents } from '../actions'
+import * as selectors from '../reducers/reducers';
 
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 };
 
 class EventMap extends Component {
+
   constructor(props, context){
     super(props, context);
     this.state = {
@@ -15,25 +17,25 @@ class EventMap extends Component {
   }
 
   componentDidMount() {
-    const { events, getEvents } = this.props;
+    const { events, loadEvents } = this.props;
     if (!events || events.length == 0) {
-      getEvents()
+      loadEvents()
     }
     this.getLocationAsync();
   }
 
   async getLocationAsync() {
-   let { status } = await Permissions.askAsync(Permissions.LOCATION);
-   if (status !== 'granted') {
-     this.setState({
-       locationResult: 'Permission to access location was denied',
-       location,
-     });
-   }
+    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status !== 'granted') {
+      this.setState({
+        locationResult: 'Permission to access location was denied',
+        location,
+      });
+    }
 
-   let location = await Location.getCurrentPositionAsync({});
-   this.setState({ locationResult: JSON.stringify(location), location });
- };
+    let location = await Location.getCurrentPositionAsync({});
+    this.setState({ locationResult: JSON.stringify(location), location });
+  };
 
   showEventScreen(event) {
     this.props.navigation.navigate('Event', { ...event } )
@@ -75,12 +77,12 @@ class EventMap extends Component {
 EventMap.propTypes = {
   events: PropTypes.array,
 
-  getEvents: PropTypes.func.isRequired,
+  loadEvents: PropTypes.func.isRequired,
 }
 
 export default connect(
   state => ({
-    events: state.reducers.events,
+    events: selectors.getEvents(state)
   }),
-  { getEvents }
+  { loadEvents }
 )(EventMap)

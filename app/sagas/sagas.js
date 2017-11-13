@@ -3,8 +3,9 @@ import { call, takeEvery, takeLatest, put, select } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 import { AUTHENTIFICATION, GET_EVENTS, GET_CATEGORIES, GET_TAGS, CREATE_EVENT } from "../actions/";
 import { loginRequest, signupRequest, getEventsRequest, getCategoriesRequest, getTagsRequest, saveEventRequest } from "../api/"
+import * as selectors from '../reducers/reducers';
 
-const getToken = state => state.reducers.user.auth_token;
+const getToken = state => state.reducers.authentication.auth_token;
 
 const authenticate = function* (action){
   try {
@@ -63,7 +64,6 @@ const getEvents = function* (action){
 
 const getCategories = function* (action){
   try {
-    yield put({ type: GET_CATEGORIES.LOADING })
 
     const token = yield select(getToken)
 
@@ -78,7 +78,6 @@ const getCategories = function* (action){
 
 const getTags = function* (action){
   try {
-    yield put({ type: GET_TAGS.LOADING })
 
     const token = yield select(getToken)
 

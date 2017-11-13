@@ -5,6 +5,7 @@ import { Container, Content, Form, Item, Input, Label, Button, Text } from 'nati
 import * as selectors from '../reducers/reducers';
 
 class Login extends Component {
+
   constructor(props, context){
     super(props, context);
     this.state = {
@@ -12,20 +13,24 @@ class Login extends Component {
       password: ""
     };
   }
+
   componentDidUpdate() {
     const { success } = this.props;
     if (success) {
       this.props.navigation.navigate('Main');
     }
   }
+
   handleLoginPress() {
     const { login } = this.props;
     const { email, password } = this.state
     login( email, password )
   }
+
   handleSignupPress() {
     this.props.navigation.navigate('Signup');
   }
+  
   render() {
     return (
        <Container>

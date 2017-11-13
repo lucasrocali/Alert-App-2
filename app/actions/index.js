@@ -27,19 +27,19 @@ export function signup(name,email,password,password_confirmation) {
   }
 }
 
-export function getEvents() {
+export function loadEvents() {
 	return {
 	    type: GET_EVENTS.SELF
   }
 }
 
-export function getCategories() {
+export function loadCategories() {
 	return {
 	    type: GET_CATEGORIES.SELF
   }
 }
 
-export function getTags() {
+export function loadTags() {
 	return {
 	    type: GET_TAGS.SELF
   }

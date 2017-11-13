@@ -1,8 +1,9 @@
 import React, { Component, PropTypes } from 'react';
 import { MapView, Location, Permissions } from 'expo';
 import { connect } from 'react-redux';
-import { saveEvent, getCategories, getTags, getEvents } from '../actions'
+import { saveEvent, loadCategories, loadTags, loadEvents } from '../actions'
 import { Container, Content, Item, Input, Label, Toast, Button, Text, Picker, Left } from 'native-base';
+import * as selectors from '../reducers/reducers';
 
 class Event extends Component {
   constructor(props, context){
@@ -17,12 +18,12 @@ class Event extends Component {
   }
 
   componentDidMount() {
-    const { categories, getCategories , tags, getTags } = this.props;
+    const { categories, loadCategories , tags, loadTags } = this.props;
     if (!categories || categories.length == 0) {
-      getCategories()
+      loadCategories()
     }
     if (!tags || tags.length == 0) {
-      getTags()
+      loadTags()
     }
     this.getLocationAsync();
   }
@@ -36,9 +37,9 @@ class Event extends Component {
   }
 
   componentDidUpdate() {
-    const { success, getEvents } = this.props;
+    const { success, loadEvents } = this.props;
     if (success) {
-      getEvents();
+      loadEvents();
       this.props.navigation.navigate('Events');
     }
   }
@@ -224,16 +225,16 @@ Event.propTypes = {
 
   // actions
   saveEvent: PropTypes.func.isRequired,
-  getCategories: PropTypes.func.isRequired,
-  getTags: PropTypes.func.isRequired,
-  getEvents: PropTypes.func.isRequired,
+  loadCategories: PropTypes.func.isRequired,
+  loadTags: PropTypes.func.isRequired,
+  loadEvents: PropTypes.func.isRequired,
 }
 
 export default connect(
   state => ({
-    success: state.reducers.success,
-    categories: state.reducers.categories,
-    tags: state.reducers.tags
+    success: selectors.isEventCreated(state),
+    categories:selectors.getCategories(state),
+    tags: selectors.getTags(state)
   }),
-  { saveEvent, getCategories, getTags, getEvents }
+  { saveEvent, loadCategories, loadTags, loadEvents }
 )(Event)
