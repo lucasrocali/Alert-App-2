@@ -1,63 +1,50 @@
 import React, { Component, PropTypes } from 'react';
-import { Constants, MapView, Location, Permissions } from 'expo';
-import { bindActionCreators } from 'redux';
+import { MapView, Location, Permissions } from 'expo';
 import { connect } from 'react-redux';
-import { saveEvent, getCategories, getTags, getEvents } from '../actions'
-import { Container, Header, Content, Form, Item, Input, Label, Toast, Button, Text, Picker, Left } from 'native-base';
-import Spinner from 'react-native-loading-spinner-overlay';
+import { saveEvent, loadCategories, loadTags, loadEvents, setStrenght } from '../actions'
+import { Container, Content, Item, Input, Label, Toast, Button, Text, Picker, Left } from 'native-base';
+import * as selectors from '../reducers/reducers';
 
 class Event extends Component {
   constructor(props, context){
     super(props, context);
     this.state = {
       locationResult: null,
-      location: {coords: { latitude: 37.78825, longitude: -122.4324}},
-      seenMessage: false,
+      location: null,
       selected_category_index: undefined,
-      selected_tag_index: undefined
+      selected_tag_index: undefined,
+      comment: undefined
     };
   }
-  componentWillMount() {
-    const { categories, getCategories , tags, getTags } = this.props;
+
+  componentDidMount() {
+    const { categories, loadCategories , tags, loadTags } = this.props;
     if (!categories || categories.length == 0) {
-      getCategories()
+      loadCategories()
     }
     if (!tags || tags.length == 0) {
-      getTags()
+      loadTags()
     }
+    this.getLocationAsync();
   }
+
   onCategoryChange(index: string) {
-    console.log('onCategoryChange' + index)
     this.setState({selected_category_index: index});
   }
+
   onTagChange(index: string) {
-    console.log('onCategoryChange' + index)
     this.setState({selected_tag_index: index});
-  }
-  componentDidMount() {
-    this._getLocationAsync();
   }
 
   componentDidUpdate() {
-    const { success, message, getEvents } = this.props;
+    const { success, loadEvents } = this.props;
     if (success) {
-      getEvents();
+      loadEvents();
       this.props.navigation.navigate('Events');
-    } else if (message && !this.state.seenMessage) {
-      this.setState({seenMessage:true})
-      Toast.show({
-              text: message,
-              position: 'bottom',
-              buttonText: 'Ok'
-            })
     }
   }
 
-  _handleMapRegionChange = mapRegion => {
-    console.log("_handleMapRegionChange ");
-  };
-
-  _getLocationAsync = async () => {
+  async getLocationAsync() {
    let { status } = await Permissions.askAsync(Permissions.LOCATION);
    if (status !== 'granted') {
      this.setState({
@@ -70,7 +57,7 @@ class Event extends Component {
    this.setState({ locationResult: JSON.stringify(location), location, });
  };
 
-  locationChanged = (location) => {
+  locationChanged(location) {
     region = {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
@@ -80,93 +67,169 @@ class Event extends Component {
     this.setState({location, region})
   }
 
-  render() {
-    console.log(this.props.navigation.state);
-    const event = this.props.navigation.state.params;
-    console.log(event);
+  getRegion(event = null) {
+    const { location } = this.state;
+    const lat = event ? event.location.lat : location ? location.coords.latitude : null
+    const lon = event ? event.location.lon : location ? location.coords.longitude : null
+    return lat && lon && { 
+      latitude: lat, 
+      longitude: lon, 
+      latitudeDelta: 0.0922, 
+      longitudeDelta: 0.0421 
+    }
+  }
 
-    const { loading, categories, tags, saveEvent } = this.props;
-    
+  getCoordinate(event = null) {
+    const { location } = this.state;
+    const lat = event ? event.location.lat : location ? location.coords.latitude : null
+    const lon = event ? event.location.lon : location ? location.coords.longitude : null
+    return lat && lon && { 
+      latitude: lat, 
+      longitude: lon
+    }
+  }
+
+  handleMarkerChanged(e) {
+    this.setState({ location: { coords: e.nativeEvent.coordinate } })
+  }
+
+  handleSaveEventBtn() {
+    const { categories, tags, saveEvent } = this.props;
+
+    const { location, selected_category_index, selected_tag_index, comment } = this.state
+
+    const category = categories[selected_category_index]
+    const tag = tags[selected_tag_index]
+
+    if (category == null) {
+      Toast.show({
+                  text: "Select a category",
+                  position: 'bottom',
+                  buttonText: 'Ok'
+                })
+      
+    } else  if (tag == null){
+      Toast.show({
+                  text: "Select a tag",
+                  position: 'bottom',
+                  buttonText: 'Ok'
+                })
+    } else {
+      saveEvent({
+        lat: location.coords.latitude,
+        lon: location.coords.longitude,
+        category: category,
+        tag: tag,
+        comment: comment,
+      })
+    }
+  }
+
+  handleReinforceEventBtn() {
+    const event = this.props.navigation.state.params;
+    const { setStrenght } = this.props
+    setStrenght(event.id,1)
+  }
+
+  handleReportEventBtn() {
+    const event = this.props.navigation.state.params;
+    const { setStrenght } = this.props
+    setStrenght(event.id,0)
+  }
+
+  renderViewEvent(event) {
     return (
-       <Container style= {{ backgroundColor: '#FFF' }}>
-       {event ?
-        <Content padder>
-        <Spinner visible={loading} textStyle={{color: '#FFF'}} />
-          
-          <Form>
-            <Item stackedLabel>
-              <Label>Category</Label>
-              <Input disabled
-                value = {event.category.name}
-                onChangeText={(text) => this.setState({email:text})} />
-            </Item>
-            <Item stackedLabel>
-              <Label>User</Label>
-              <Input disabled
-                value = {event.user_name}
-                onChangeText={(text) => this.setState({password:text})} />
-            </Item>
-          </Form>
-          <Button primary block style= {{ margin: 10 }} onPress={()=> {
-                                                          // this.props.navigation.navigate('Main');
-                                                          // this.setState({seenMessage:false})
-                                                          // login(this.state.email, this.state.password);
-                                                        }}>
-            <Text>Edit</Text>
-          </Button>
-        </Content>
-        : 
-        <Content padder>
-          <Item stackedLabel>
-              <Label>Category</Label>
-              <Picker 
-                  mode="dropdown"
-                  placeholder="Select Category"
-                  selectedValue={this.state.selected_category_index}
-                  onValueChange={this.onCategoryChange.bind(this)}>
-                  { categories && categories.map((category, index) => 
-                                <Item key={index} label={category.name} value={index} />
-                  )}
-                  
-              </Picker>
-          </Item>
-          <Item stackedLabel>
-              <Label>Tags</Label>
-              <Picker 
-                  mode="dropdown"
-                  placeholder="Select Category"
-                  selectedValue={this.state.selected_tag_index}
-                  onValueChange={this.onTagChange.bind(this)}>
-                  { tags && tags.map((tag, index) => 
-                                <Item key={index} label={tag.name} value={index} />
-                  )}
-                  
-              </Picker>
-          </Item>
-          <MapView
-            style={{ alignSelf: 'stretch', height: 200, marginTop: 20 }}
-            region={ { latitude: event ? event.location.lat : this.state.location.coords.latitude, longitude: event ? event.location.lon : this.state.location.coords.longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421 } }
-            onRegionChange={this._handleMapRegionChange}>
-          
-            <MapView.Marker
-              coordinate={ { latitude: event ? event.location.lat : this.state.location.coords.latitude, longitude: event ? event.location.lon : this.state.location.coords.longitude } }
-              title={ event ? event.category.name : 'My Location' }
-              description="Some description"
-            />
-       
-          </MapView>
-          <Button primary block style= {{ margin: 10 }} onPress={()=> {
-                                                          console.log('Save');
-                                                          this.setState({seenMessage:false})
-                                                          saveEvent(this.state.location.coords.latitude, this.state.location.coords.longitude, categories[this.state.selected_category_index], tags[this.state.selected_tag_index])
-                                                          // this.props.navigation.navigate('Main');
-                                                          // this.setState({seenMessage:false})
-                                                          // login(this.state.email, this.state.password);
-                                                        }}>
-            <Text>Save</Text>
-          </Button>
-        </Content> 
-        }
+      <Content padder>
+        <Item stackedLabel>
+          <Label>User</Label>
+          <Input disabled
+            value = {event.user_name} />
+        </Item>
+        <Item stackedLabel>
+          <Label>Category</Label>
+          <Input disabled
+            value = {event.category.name} />
+        </Item>
+        <Text note>{`${event.up_count} ups and ${event.down_count} downs`}</Text>
+        <MapView
+          style={ { alignSelf: 'stretch', height: 200, marginTop: 20 } }
+          region={ this.getRegion(event) } >
+
+          <MapView.Marker
+            coordinate= { this.getCoordinate(event) }
+            title= { event.category.name }
+            description = { event.user_name } />
+        </MapView>
+        <Button primary block style= {{ margin: 10 }} onPress={this.handleReinforceEventBtn.bind(this)}>
+          <Text>Reforçar</Text>
+        </Button>
+        <Button light block style= {{ margin: 10 }} onPress={this.handleReportEventBtn.bind(this)}>
+          <Text>Denunciar</Text>
+        </Button>
+      </Content>
+    )
+  }
+
+  renderPickerItem(item,index) {
+    return (
+      <Item key={index} label={item.name} value={index} />
+    )
+  }
+
+  renderCreateEvent() {
+    const { categories, tags } = this.props;
+    return (
+      <Content padder>
+        <Item stackedLabel>
+          <Label>Category</Label>
+          <Picker 
+              mode="dropdown"
+              placeholder="Select Category"
+              selectedValue={this.state.selected_category_index}
+              onValueChange={this.onCategoryChange.bind(this)} >
+
+              { categories && categories.map((category, index) => this.renderPickerItem(category,index))}
+              
+          </Picker>
+        </Item>
+        <Item stackedLabel>
+          <Label>Tags</Label>
+          <Picker 
+              mode="dropdown"
+              placeholder="Select Category"
+              selectedValue={this.state.selected_tag_index}
+              onValueChange={this.onTagChange.bind(this)} >
+
+              { tags && tags.map((tag, index) => this.renderPickerItem(tag,index))}
+              
+          </Picker>
+        </Item>
+        <MapView
+          style={{ alignSelf: 'stretch', height: 200, marginTop: 20 }}
+          region={this.getRegion()} >
+        
+          <MapView.Marker draggable
+            coordinate= { this.getCoordinate() }
+            onDragEnd={(e) => this.handleMarkerChanged(e) }
+          />
+
+        </MapView>
+        <Item stackedLabel>
+          <Label>Comment</Label>
+          <Input onChangeText={(text) => this.setState({comment:text})} />
+        </Item>
+        <Button primary block style= {{ margin: 10 }} onPress={this.handleSaveEventBtn.bind(this)}>
+          <Text>Save</Text>
+        </Button>
+      </Content>
+    )
+  }
+
+  render() {
+    const event = this.props.navigation.state.params;
+    return (
+      <Container style= {{ backgroundColor: '#FFF' }}>
+        {event ? this.renderViewEvent(event) : this.renderCreateEvent() }
       </Container>
       
     );
@@ -174,27 +237,22 @@ class Event extends Component {
 }
 
 Event.propTypes = {
-  // data
-  message: PropTypes.string,
-  loading: PropTypes.bool,
   success: PropTypes.bool,
   categories: PropTypes.array,
   tags: PropTypes.array,
 
-  // actions
   saveEvent: PropTypes.func.isRequired,
-  getCategories: PropTypes.func.isRequired,
-  getTags: PropTypes.func.isRequired,
-  getEvents: PropTypes.func.isRequired,
+  loadCategories: PropTypes.func.isRequired,
+  loadTags: PropTypes.func.isRequired,
+  loadEvents: PropTypes.func.isRequired,
+  setStrenght: PropTypes.func.isRequired
 }
 
 export default connect(
   state => ({
-    message: state.reducers.new_event.message,
-    loading: state.reducers.new_event.loading,
-    success: state.reducers.new_event.success,
-    categories: state.reducers.categories.categories,
-    tags: state.reducers.tags.tags
+    success: selectors.isEventSuccess(state),
+    categories:selectors.getCategories(state),
+    tags: selectors.getTags(state)
   }),
-  { saveEvent, getCategories, getTags, getEvents }
+  { saveEvent, loadCategories, loadTags, loadEvents, setStrenght }
 )(Event)

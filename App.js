@@ -10,6 +10,17 @@ import reducer from './app/reducers/index';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { root } from './app/sagas/sagas';
 
+//TODO
+/*
+- Melhorar reducers
+- Up Down
+- Set up Down
+- Detox
+- Logout
+- Unmess stack views 
+- logout api
+*/
+
 const sagaMiddleware = createSagaMiddleware();
 
 const store = createStore(reducer, composeWithDevTools(
@@ -23,9 +34,7 @@ export default class App extends React.Component {
   render() {
     return (
       <Provider store={store}>
-      	<Root>
-          <RootNavigation />
-        </Root>
+        <RootNavigation />
        </Provider>
     );
   }
